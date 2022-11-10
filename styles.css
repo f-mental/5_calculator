@@ -18,6 +18,7 @@ main {
     height: 25px;
     width: 230px;
     margin: 10px;
+    text-align: right;
 }
 
 .bottom {
