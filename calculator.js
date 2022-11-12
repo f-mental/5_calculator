@@ -8,7 +8,6 @@ let currentOperation;
 let result;
 let beginCalculation = true;
 let beginFromFirst;
-let fromPreviousCalculation;
 let isDecimalActive;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
@@ -93,10 +92,7 @@ keys.forEach(key => {
             if (!firstNumber) {
                 topScreen.innerText = `${bottomScreen.innerText}=`
             } else {
-                if (!result) {
-                    secondNumber = bottomScreen.innerText;
-                    beginFromFirst = false;
-                }
+                secondNumber = bottomScreen.innerText;
                 beginFromFirst = false;
                 topScreen.innerText = `${firstNumber}${currentOperation}${secondNumber}=`;
                 result = performOperation(currentOperation, firstNumber, secondNumber);
@@ -115,3 +111,5 @@ keys.forEach(key => {
 
     })
 })
+
+// add keyboard support here
