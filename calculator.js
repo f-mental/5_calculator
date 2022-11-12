@@ -108,8 +108,9 @@ keys.forEach(key => {
             if (!firstNumber) {
                 topScreen.innerText = `${bottomScreen.innerText}=`
             } else {
-                secondNumber = bottomScreen.innerText;
-                beginFromFirst = false;
+                if (!result) {
+                    secondNumber = bottomScreen.innerText;
+                }
                 topScreen.innerText = `${firstNumber}${currentOperation}${secondNumber}=`;
                 result = performOperation(currentOperation, firstNumber, secondNumber);
                 bottomScreen.innerText = result;
