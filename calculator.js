@@ -7,7 +7,6 @@ let secondNumber;
 let currentOperation;
 let result;
 let beginCalculation = true;
-let beginFromFirst;
 let isDecimalActive;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
@@ -36,9 +35,9 @@ function resetCalculation () {
     topScreen.innerText = '';
 }
 
-// not sure what is happening with floats, check it thoroughly
+// below is what happening with floats, check it thoroughly
 // float -> https://www.w3schools.com/js/js_numbers.asp
-// try to remove beginfromFirst flag
+// apply comma separation
 // check for any bugs
 
 keys.forEach(key => {
@@ -56,12 +55,6 @@ keys.forEach(key => {
                 // when a different number is pressed when there is an ongoing calculation
                 resetCalculation();
                 bottomScreen.innerText += buttonPressed;
-            } else if (firstNumber && (!beginFromFirst)) {
-                bottomScreen.innerText = '';
-                bottomScreen.innerText += buttonPressed;
-                // beginFromFirst flag is set to true to indicate that the secondNumber is about to 
-                // be generated
-                beginFromFirst = true;
             } else if ((bottomScreen.innerText === '0')) {
                 bottomScreen.innerText = '';
                 bottomScreen.innerText += buttonPressed;
@@ -79,7 +72,6 @@ keys.forEach(key => {
                 beginCalculation = true;
             }        
             else if (firstNumber) {
-                bottomScreen.innerText = '';
                 bottomScreen.innerText += buttonPressed;
             } else if(!(bottomScreen.innerText === '0')) {
                 bottomScreen.innerText += buttonPressed;
@@ -102,9 +94,11 @@ keys.forEach(key => {
             isDecimalActive = false;
             if (firstNumber) {
                 topScreen.innerText = `${firstNumber}${currentOperation}`
+                bottomScreen.innerText = '0';
             } else {
                 firstNumber = bottomScreen.innerText;
                 topScreen.innerText = `${firstNumber}${currentOperation}`
+                beginCalculation = true;
             };
         }
 
