@@ -10,8 +10,8 @@ let beginCalculation = true;
 let isDecimalActive;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
-    firstNumber = parseFloat(firstNumber);
-    secondNumber = parseFloat(secondNumber);
+    firstNumber = Number(firstNumber);
+    secondNumber = Number(secondNumber);
     switch (currentOperation) {
         case '+':
             return firstNumber + secondNumber
@@ -35,10 +35,52 @@ function resetCalculation () {
     topScreen.innerText = '';
 }
 
+function commaSeparation(numberText) {
+    let trailingDecimal;
+    let decimalIndex;
+    let formattedNumber = '';
+    numberText = numberText.replaceAll(',', '')
+    if (numberText.includes('.')) {
+        decimalIndex = numberText.indexOf('.');
+        trailingDecimal = numberText.slice(decimalIndex,)
+        let j = 0;
+        for (let i = decimalIndex-1; i>-1; i--) {
+                j += 1;
+                if (j % 3 === 0) {
+                    formattedNumber = ',' + numberText[i] + formattedNumber;
+                } else {
+                    formattedNumber = numberText[i] + formattedNumber;
+                }
+        }
+        formattedNumber += trailingDecimal;
+    } else {
+        decimalIndex = numberText.length;
+        let j = 0;
+        for (let i = decimalIndex-1; i>-1; i--) {
+                j += 1;
+                if (j % 3 === 0) {
+                    formattedNumber = ',' + numberText[i] + formattedNumber;
+                } else {
+                    formattedNumber = numberText[i] + formattedNumber;
+                }
+        
+        }
+    }
+
+    if (formattedNumber[0] === ',') {
+        return formattedNumber.slice(1,);
+    } else {
+        return formattedNumber;
+    }
+}
+
+
+// apply comma separation
+// allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
+// check for any bugs
 // below is what happening with floats, check it thoroughly
 // float -> https://www.w3schools.com/js/js_numbers.asp
-// apply comma separation
-// check for any bugs
+
 
 keys.forEach(key => {
     key.addEventListener('click', ev => {
@@ -52,6 +94,7 @@ keys.forEach(key => {
                 bottomScreen.innerText = '';
                 bottomScreen.innerText += buttonPressed;
             } else if (result || (result === 0)) {
+                isDecimalActive = false;
                 // when a different number is pressed when there is an ongoing calculation
                 resetCalculation();
                 bottomScreen.innerText += buttonPressed;
@@ -60,6 +103,7 @@ keys.forEach(key => {
                 bottomScreen.innerText += buttonPressed;
             }else {
                 bottomScreen.innerText += buttonPressed;
+                bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
             }
 
         }
@@ -82,8 +126,8 @@ keys.forEach(key => {
         if (buttonPressed === '.') {
             if (!isDecimalActive){
                 isDecimalActive = true;
-                beginCalculation = false;
                 bottomScreen.innerText += buttonPressed;
+                beginCalculation = false;
             }
         }
 
@@ -97,8 +141,8 @@ keys.forEach(key => {
                 bottomScreen.innerText = '0';
             } else {
                 firstNumber = bottomScreen.innerText;
+                bottomScreen.innerText = '0';
                 topScreen.innerText = `${firstNumber}${currentOperation}`
-                beginCalculation = true;
             };
         }
 
@@ -107,6 +151,7 @@ keys.forEach(key => {
         if (buttonPressed === '=') {
             if (!firstNumber) {
                 topScreen.innerText = `${bottomScreen.innerText}=`
+                beginCalculation = true;
             } else {
                 if (!result) {
                     secondNumber = bottomScreen.innerText;
@@ -128,18 +173,14 @@ keys.forEach(key => {
 
         // if del is pressed
         if (buttonPressed === 'del') {
-            // if (result) {
-            //     let lastBottomDisplay = bottomScreen.innerText;
-            //     resetCalculation();
-            //     bottomScreen.innerText = lastBottomDisplay
-            //     beginCalculation = true;
-            // } else {}
+            if (!result) {
                 let bottomTextLength = bottomScreen.innerText.length;
                 if (bottomTextLength > 1) {
                     bottomScreen.innerText = bottomScreen.innerText.slice(0, bottomTextLength-1)
                 } else {
                     bottomScreen.innerText = '0';
                 }
+            }
         }
 
     })
