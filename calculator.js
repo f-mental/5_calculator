@@ -12,20 +12,60 @@ let bottomTextLength;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
 
-    firstNumber = Number(String(firstNumber).replaceAll(',', ''));
-    secondNumber = Number(String(secondNumber).replaceAll(',', ''));
+    let zeroMultiplier;
+    let answer;
+
+    firstNumber = String(firstNumber).replaceAll(',', '');
+    secondNumber = String(secondNumber).replaceAll(',', '');
+
+    // trigger error/overflow when there is e on result
+    // if (/[a-z]/.test(firstNumber) || /[a-z]/.test(secondNumber)) {
+    //     return 'Error/Overflow';
+    // }
+
+    //Fix floats
+    if (firstNumber.includes('.') && secondNumber.includes('.')) {
+        firstNumberDecimalTailLength = firstNumber.slice(firstNumber.indexOf('.')+1,).length;
+        secondNumberDecimalTailLength = secondNumber.slice(secondNumber.indexOf('.')+1,).length;
+        
+        if (firstNumberDecimalTailLength > secondNumberDecimalTailLength) {
+            zeroMultiplier = firstNumberDecimalTailLength;
+        } else if (secondNumberDecimalTailLength > firstNumberDecimalTailLength) {
+            zeroMultiplier = secondNumberDecimalTailLength;
+        } else {
+            zeroMultiplier = firstNumberDecimalTailLength;
+        }
+    }
+
+    firstNumber = Number(firstNumber);
+    secondNumber = Number(secondNumber);
+
+    if (zeroMultiplier){
+        firstNumber = firstNumber*(10**zeroMultiplier);
+        secondNumber = secondNumber*(10**zeroMultiplier);
+    }
+
     switch (currentOperation) {
         case '+':
-            return firstNumber + secondNumber
+            answer = firstNumber + secondNumber;
+            break;
 
         case '-':
-            return firstNumber - secondNumber
+            answer = firstNumber - secondNumber;
+            break;
 
         case '*':
-            return firstNumber * secondNumber
+            answer = firstNumber * secondNumber;
+            break;
 
         case '/':
-            return firstNumber / secondNumber
+            answer = firstNumber / secondNumber;
+    }
+
+    if (zeroMultiplier){
+        return (answer/(10**zeroMultiplier))
+    } else {
+        return answer;
     }
 }
 
@@ -80,12 +120,7 @@ function commaSeparation(numberText) {
     }
 }
 
-// define digit limit (16)
-// allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
 // check for any bugs
-// below is what happening with floats, check it thoroughly, multiply by 10*n and divide by 10*n if both floats
-// float -> https://www.w3schools.com/js/js_numbers.asp
-
 
 keys.forEach(key => {
     key.addEventListener('click', ev => {
@@ -128,7 +163,7 @@ keys.forEach(key => {
                         resetCalculation();
                         bottomScreen.innerText += buttonPressed;
                         beginCalculation = true;
-                    } else if(!(bottomScreen.innerText === '0')) {
+                    } else if(bottomScreen.innerText !== '0') {
                         bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
                     }
                 }
@@ -150,10 +185,24 @@ keys.forEach(key => {
             result = null;
             currentOperation = buttonPressed;
             isDecimalActive = false;
-            if (firstNumber) {
+            // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
+            // except when the values are equal;
+            if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber != bottomScreen.innerText)) {
+                secondNumber = bottomScreen.innerText;
+                result = performOperation(currentOperation, firstNumber, secondNumber);
+                bottomScreen.innerText = commaSeparation(result);
+                firstNumber = result;
+                topScreen.innerText = `${firstNumber}${currentOperation}`
+                isDecimalActive = true;
+                beginCalculation = true;
+                result = null;
+            } else if (firstNumber == bottomScreen.innerText) {
+                return;
+            }else if (firstNumber) {
                 topScreen.innerText = `${firstNumber}${currentOperation}`
                 bottomScreen.innerText = '0';
             } else {
+                console.log(firstNumber)
                 firstNumber = bottomScreen.innerText;
                 bottomScreen.innerText = '0';
                 topScreen.innerText = `${firstNumber.replaceAll(',', '')}${currentOperation}`
@@ -201,3 +250,5 @@ keys.forEach(key => {
 })
 
 // add keyboard support here
+// create function for every keys, and pass it to keyboard inputs;
+
