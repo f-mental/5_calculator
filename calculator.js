@@ -10,8 +10,9 @@ let beginCalculation = true;
 let isDecimalActive;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
-    firstNumber = Number(firstNumber);
-    secondNumber = Number(secondNumber);
+
+    firstNumber = Number(String(firstNumber).replaceAll(',', ''));
+    secondNumber = Number(String(secondNumber).replaceAll(',', ''));
     switch (currentOperation) {
         case '+':
             return firstNumber + secondNumber
@@ -39,10 +40,11 @@ function commaSeparation(numberText) {
     let trailingDecimal;
     let decimalIndex;
     let formattedNumber = '';
-    numberText = numberText.replaceAll(',', '')
+    numberText = (String(numberText).replaceAll(',', ''));
     if (numberText.includes('.')) {
         decimalIndex = numberText.indexOf('.');
         trailingDecimal = numberText.slice(decimalIndex,)
+
         let j = 0;
         for (let i = decimalIndex-1; i>-1; i--) {
                 j += 1;
@@ -76,9 +78,10 @@ function commaSeparation(numberText) {
 
 
 // apply comma separation
+// define digit limit (16)
 // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
 // check for any bugs
-// below is what happening with floats, check it thoroughly
+// below is what happening with floats, check it thoroughly, multiply by 10*n and divide by 10*n if both floats
 // float -> https://www.w3schools.com/js/js_numbers.asp
 
 
@@ -114,11 +117,8 @@ keys.forEach(key => {
                 resetCalculation();
                 bottomScreen.innerText += buttonPressed;
                 beginCalculation = true;
-            }        
-            else if (firstNumber) {
-                bottomScreen.innerText += buttonPressed;
             } else if(!(bottomScreen.innerText === '0')) {
-                bottomScreen.innerText += buttonPressed;
+                bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
             }
         }
 
@@ -142,7 +142,7 @@ keys.forEach(key => {
             } else {
                 firstNumber = bottomScreen.innerText;
                 bottomScreen.innerText = '0';
-                topScreen.innerText = `${firstNumber}${currentOperation}`
+                topScreen.innerText = `${firstNumber.replaceAll(',', '')}${currentOperation}`
             };
         }
 
@@ -156,9 +156,9 @@ keys.forEach(key => {
                 if (!result) {
                     secondNumber = bottomScreen.innerText;
                 }
-                topScreen.innerText = `${firstNumber}${currentOperation}${secondNumber}=`;
+                topScreen.innerText = `${String(firstNumber).replaceAll(',', '')}${currentOperation}${secondNumber.replaceAll(',', '')}=`;
                 result = performOperation(currentOperation, firstNumber, secondNumber);
-                bottomScreen.innerText = result;
+                bottomScreen.innerText = commaSeparation(result);
                 firstNumber = result;
                 isDecimalActive = true;
             }
@@ -176,7 +176,7 @@ keys.forEach(key => {
             if (!result) {
                 let bottomTextLength = bottomScreen.innerText.length;
                 if (bottomTextLength > 1) {
-                    bottomScreen.innerText = bottomScreen.innerText.slice(0, bottomTextLength-1)
+                    bottomScreen.innerText = commaSeparation(bottomScreen.innerText.slice(0, bottomTextLength-1))
                 } else {
                     bottomScreen.innerText = '0';
                 }
