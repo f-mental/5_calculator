@@ -8,6 +8,7 @@ let currentOperation;
 let result;
 let beginCalculation = true;
 let isDecimalActive;
+let bottomTextLength;
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
 
@@ -69,15 +70,16 @@ function commaSeparation(numberText) {
         }
     }
 
-    if (formattedNumber[0] === ',') {
+    // fix negative numbers with comma after the negative sign
+    if (formattedNumber[0] === '-' && formattedNumber[1] === ',') {
+        return formattedNumber.replace(',', '');
+    } else if (formattedNumber[0] === ',') {
         return formattedNumber.slice(1,);
     } else {
         return formattedNumber;
     }
 }
 
-
-// apply comma separation
 // define digit limit (16)
 // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
 // check for any bugs
@@ -89,36 +91,48 @@ keys.forEach(key => {
     key.addEventListener('click', ev => {
         let buttonPressed = ev.target.value;
 
-        // if digit is pressed
-        if (/[1-9]/.test(buttonPressed)) {
-            //if the calculator program is just started, beginCalculation flag is set to true
-            if (beginCalculation){
-                beginCalculation = false;
-                bottomScreen.innerText = '';
-                bottomScreen.innerText += buttonPressed;
-            } else if (result || (result === 0)) {
-                isDecimalActive = false;
-                // when a different number is pressed when there is an ongoing calculation
-                resetCalculation();
-                bottomScreen.innerText += buttonPressed;
-            } else if ((bottomScreen.innerText === '0')) {
-                bottomScreen.innerText = '';
-                bottomScreen.innerText += buttonPressed;
-            }else {
-                bottomScreen.innerText += buttonPressed;
-                bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
-            }
+        // 16-digit limit
+        if (/[0-9]/.test(buttonPressed)) {
+            bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
+                                                     .replaceAll('.','')
+                                                     .length;
+            if (bottomTextLength >= 16) {
+                alert("You reached max digit input!");
+            } else {
 
-        }
+                // if digit is pressed
+                if (/[1-9]/.test(buttonPressed)) {
+                    //if the calculator program is just started, beginCalculation flag is set to true
+                    if (beginCalculation){
+                        beginCalculation = false;
+                        bottomScreen.innerText = '';
+                        bottomScreen.innerText += buttonPressed;
+                    } else if (result || (result === 0)) {
+                        isDecimalActive = false;
+                        // when a different number is pressed when there is an ongoing calculation
+                        resetCalculation();
+                        bottomScreen.innerText += buttonPressed;
+                    } else if ((bottomScreen.innerText === '0')) {
+                        bottomScreen.innerText = '';
+                        bottomScreen.innerText += buttonPressed;
+                    }else {
+                        bottomScreen.innerText += buttonPressed;
+                        bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
+                    }
 
-        // if zero is pressed
-        if (buttonPressed === '0') {
-            if (result || (result === 0)) {
-                resetCalculation();
-                bottomScreen.innerText += buttonPressed;
-                beginCalculation = true;
-            } else if(!(bottomScreen.innerText === '0')) {
-                bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
+                }
+
+                // if zero is pressed
+                if (buttonPressed === '0') {
+                    if (result || (result === 0)) {
+                        resetCalculation();
+                        bottomScreen.innerText += buttonPressed;
+                        beginCalculation = true;
+                    } else if(!(bottomScreen.innerText === '0')) {
+                        bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
+                    }
+                }
+
             }
         }
 
@@ -174,7 +188,7 @@ keys.forEach(key => {
         // if del is pressed
         if (buttonPressed === 'del') {
             if (!result) {
-                let bottomTextLength = bottomScreen.innerText.length;
+                bottomTextLength = bottomScreen.innerText.length;
                 if (bottomTextLength > 1) {
                     bottomScreen.innerText = commaSeparation(bottomScreen.innerText.slice(0, bottomTextLength-1))
                 } else {
