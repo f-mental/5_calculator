@@ -85,6 +85,7 @@ function performOperation (currentOperation, firstNumber, secondNumber) {
 
     if (/[a-z]/.test(answer)){
         disableKeys();
+        topScreen.innerText = '';
         return 'Error/Overflow';
     } else {
         return answer;
@@ -147,128 +148,154 @@ function commaSeparation(numberText) {
     }
 }
 
+function digitPressed(buttonPressed) {
+bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
+                                                .replaceAll('.','')
+                                                .length;
+    if (bottomTextLength >= 16) {
+        alert("You reached max digit input!");
+    } else {
+        // if non-zero digit is pressed
+        if (/[1-9]/.test(buttonPressed)) {
+            //if the calculator program is just started, beginCalculation flag is set to true
+            if (beginCalculation){
+                beginCalculation = false;
+                bottomScreen.innerText = '';
+                bottomScreen.innerText += buttonPressed;
+            } else if (result || (result === 0)) {
+                isDecimalActive = false;
+                // when a different number is pressed when there is an ongoing calculation
+                resetCalculation();
+                bottomScreen.innerText += buttonPressed;
+            } else if ((bottomScreen.innerText === '0')) {
+                bottomScreen.innerText = '';
+                bottomScreen.innerText += buttonPressed;
+            }else {
+                bottomScreen.innerText += buttonPressed;
+                bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
+            }
+
+        }
+
+        // if zero is pressed
+        if (buttonPressed === '0') {
+            if (result || (result === 0)) {
+                resetCalculation();
+                bottomScreen.innerText += buttonPressed;
+                beginCalculation = true;
+            } else if(bottomScreen.innerText !== '0') {
+                bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
+            }
+        }
+
+    }
+}
+
+function decimalPressed(buttonPressed){
+    if (!isDecimalActive){
+        isDecimalActive = true;
+        bottomScreen.innerText += buttonPressed;
+        beginCalculation = false;
+    }
+}
+
+
+function operationPressed(buttonPressed) {
+    result = null;
+    currentOperation = buttonPressed;
+    isDecimalActive = false;
+    // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
+    // except when the values are equal;
+    if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber !== Number(bottomScreen.innerText.replace(',', '')))) {
+        secondNumber = bottomScreen.innerText;
+        result = performOperation(currentOperation, firstNumber, secondNumber);
+        bottomScreen.innerText = commaSeparation(result);
+        firstNumber = result;
+        topScreen.innerText = `${firstNumber}${currentOperation}`
+        isDecimalActive = true;
+        beginCalculation = true;
+        result = null;
+    } else if (firstNumber) {
+        topScreen.innerText = `${firstNumber}${currentOperation}`
+        bottomScreen.innerText = '0';
+    } else {
+        firstNumber = bottomScreen.innerText;
+        bottomScreen.innerText = '0';
+        topScreen.innerText = `${firstNumber.replaceAll(',', '')}${currentOperation}`
+    }
+}
+
+
+function equalSignPressed() {
+    if (!firstNumber) {
+        topScreen.innerText = `${bottomScreen.innerText}=`
+        beginCalculation = true;
+    } else {
+        if (!result) {
+            secondNumber = bottomScreen.innerText;
+        }
+        topScreen.innerText = `${String(firstNumber).replaceAll(',', '')}${currentOperation}${secondNumber.replaceAll(',', '')}=`;
+        result = performOperation(currentOperation, firstNumber, secondNumber);
+        bottomScreen.innerText = commaSeparation(result);
+        firstNumber = result;
+        isDecimalActive = true;
+    }
+}
+
+
+function resetKeyPressed() {
+    if (keysDisabled){
+        enableKeys();
+    }
+    resetCalculation();
+    bottomScreen.innerText += '0';
+    beginCalculation = true;
+}
+
+function delKeyPressed(){
+    if (!result) {
+        bottomTextLength = bottomScreen.innerText.length;
+        if (bottomTextLength > 1) {
+            bottomScreen.innerText = commaSeparation(bottomScreen.innerText.slice(0, bottomTextLength-1))
+        } else {
+            bottomScreen.innerText = '0';
+        }
+    }
+}
+
 keys.forEach(key => {
     key.addEventListener('click', ev => {
         let buttonPressed = ev.target.value;
 
         // 16-digit limit
         if (/[0-9]/.test(buttonPressed)) {
-            bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
-                                                     .replaceAll('.','')
-                                                     .length;
-            if (bottomTextLength >= 16) {
-                alert("You reached max digit input!");
-            } else {
-
-                // if digit is pressed
-                if (/[1-9]/.test(buttonPressed)) {
-                    //if the calculator program is just started, beginCalculation flag is set to true
-                    if (beginCalculation){
-                        beginCalculation = false;
-                        bottomScreen.innerText = '';
-                        bottomScreen.innerText += buttonPressed;
-                    } else if (result || (result === 0)) {
-                        isDecimalActive = false;
-                        // when a different number is pressed when there is an ongoing calculation
-                        resetCalculation();
-                        bottomScreen.innerText += buttonPressed;
-                    } else if ((bottomScreen.innerText === '0')) {
-                        bottomScreen.innerText = '';
-                        bottomScreen.innerText += buttonPressed;
-                    }else {
-                        bottomScreen.innerText += buttonPressed;
-                        bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
-                    }
-
-                }
-
-                // if zero is pressed
-                if (buttonPressed === '0') {
-                    if (result || (result === 0)) {
-                        resetCalculation();
-                        bottomScreen.innerText += buttonPressed;
-                        beginCalculation = true;
-                    } else if(bottomScreen.innerText !== '0') {
-                        bottomScreen.innerText = (commaSeparation(bottomScreen.innerText += buttonPressed));
-                    }
-                }
-
-            }
+            digitPressed(buttonPressed);
         }
 
         // if decimal is pressed
         if (buttonPressed === '.') {
-            if (!isDecimalActive){
-                isDecimalActive = true;
-                bottomScreen.innerText += buttonPressed;
-                beginCalculation = false;
-            }
+            decimalPressed(buttonPressed);
         }
 
         // if operation symbol is pressed
         if (operations.includes(buttonPressed)) {
-            result = null;
-            currentOperation = buttonPressed;
-            isDecimalActive = false;
-            // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
-            // except when the values are equal;
-            if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber != bottomScreen.innerText)) {
-                secondNumber = bottomScreen.innerText;
-                result = performOperation(currentOperation, firstNumber, secondNumber);
-                bottomScreen.innerText = commaSeparation(result);
-                firstNumber = result;
-                topScreen.innerText = `${firstNumber}${currentOperation}`
-                isDecimalActive = true;
-                beginCalculation = true;
-                result = null;
-            } else if (firstNumber) {
-                topScreen.innerText = `${firstNumber}${currentOperation}`
-                bottomScreen.innerText = '0';
-            } else {
-                firstNumber = bottomScreen.innerText;
-                bottomScreen.innerText = '0';
-                topScreen.innerText = `${firstNumber.replaceAll(',', '')}${currentOperation}`
-            };
+            operationPressed(buttonPressed);
         }
 
 
         // if equalsign is pressed
         if (buttonPressed === '=') {
-            if (!firstNumber) {
-                topScreen.innerText = `${bottomScreen.innerText}=`
-                beginCalculation = true;
-            } else {
-                if (!result) {
-                    secondNumber = bottomScreen.innerText;
-                }
-                topScreen.innerText = `${String(firstNumber).replaceAll(',', '')}${currentOperation}${secondNumber.replaceAll(',', '')}=`;
-                result = performOperation(currentOperation, firstNumber, secondNumber);
-                bottomScreen.innerText = commaSeparation(result);
-                firstNumber = result;
-                isDecimalActive = true;
-            }
+            equalSignPressed();
         }
 
         // if reset is pressed
         if (buttonPressed === 'reset') {
-            if (keysDisabled){
-                enableKeys();
-            }
-            resetCalculation();
-            bottomScreen.innerText += '0';
-            beginCalculation = true;
+            resetKeyPressed();
         }
 
         // if del is pressed
         if (buttonPressed === 'del') {
-            if (!result) {
-                bottomTextLength = bottomScreen.innerText.length;
-                if (bottomTextLength > 1) {
-                    bottomScreen.innerText = commaSeparation(bottomScreen.innerText.slice(0, bottomTextLength-1))
-                } else {
-                    bottomScreen.innerText = '0';
-                }
-            }
+            delKeyPressed();
         }
 
     })
@@ -277,3 +304,36 @@ keys.forEach(key => {
 // add keyboard support here
 // create function for every keys, and pass it to keyboard inputs;
 
+document.addEventListener('keyup', ev => {
+    let buttonPressed = ev.key;
+
+    if (bottomScreen.innerText === 'Error/Overflow') {
+        return;
+    }
+
+    // 16-digit limit
+    if (/^[0-9]$/.test(buttonPressed)) {
+        digitPressed(buttonPressed);
+    }
+
+    // if decimal is pressed
+    if (buttonPressed === '.') {
+        decimalPressed(buttonPressed);
+    }
+
+    // if operation symbol is pressed
+    if (operations.includes(buttonPressed)) {
+        operationPressed(buttonPressed);
+    }
+
+    // if equalsign is pressed
+    if (buttonPressed === 'Enter') {
+        equalSignPressed();
+    }
+
+    // if del is pressed
+    if (buttonPressed === 'Backspace') {
+        delKeyPressed();
+    }
+
+})
