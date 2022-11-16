@@ -2,6 +2,7 @@ const keys = document.querySelectorAll('.keys');
 const topScreen = document.querySelector('.top');
 const bottomScreen = document.querySelector('.bottom');
 const operations = '+-/*';
+const keyboardSection = document.querySelector('.keyboard');
 let firstNumber;
 let secondNumber;
 let currentOperation;
@@ -9,6 +10,27 @@ let result;
 let beginCalculation = true;
 let isDecimalActive;
 let bottomTextLength;
+let keysDisabled;
+
+function disableKeys() {
+    keys.forEach(key => {
+        if (key.value !== 'reset') {
+            key.disabled =  true;
+            key.classList.add('disabled');
+        }
+    })
+    keyboardSection.classList.add('disabled');
+    keysDisabled = true;
+}
+
+function enableKeys() {
+    keys.forEach(key => {
+        key.disabled = false;
+        key.classList.remove('disabled');
+    })
+    keyboardSection.classList.remove('disabled');
+    keysDisabled = false;
+}
 
 function performOperation (currentOperation, firstNumber, secondNumber) {
 
@@ -18,13 +40,8 @@ function performOperation (currentOperation, firstNumber, secondNumber) {
     firstNumber = String(firstNumber).replaceAll(',', '');
     secondNumber = String(secondNumber).replaceAll(',', '');
 
-    // trigger error/overflow when there is e on result
-    // if (/[a-z]/.test(firstNumber) || /[a-z]/.test(secondNumber)) {
-    //     return 'Error/Overflow';
-    // }
-
-    //Fix floats
-    if (firstNumber.includes('.') && secondNumber.includes('.')) {
+    //Fix float operation when adding and subtracting them
+    if (firstNumber.includes('.') && secondNumber.includes('.') && (currentOperation === '+' || currentOperation === '-')) {
         firstNumberDecimalTailLength = firstNumber.slice(firstNumber.indexOf('.')+1,).length;
         secondNumberDecimalTailLength = secondNumber.slice(secondNumber.indexOf('.')+1,).length;
         
@@ -63,7 +80,12 @@ function performOperation (currentOperation, firstNumber, secondNumber) {
     }
 
     if (zeroMultiplier){
-        return (answer/(10**zeroMultiplier))
+        answer/=(10**zeroMultiplier)
+    } 
+
+    if (/[a-z]/.test(answer)){
+        disableKeys();
+        return 'Error/Overflow';
     } else {
         return answer;
     }
@@ -80,6 +102,11 @@ function resetCalculation () {
 function commaSeparation(numberText) {
     let trailingDecimal;
     let decimalIndex;
+
+    if (numberText === 'Error/Overflow') {
+        return 'Error/Overflow';
+    }
+
     let formattedNumber = '';
     numberText = (String(numberText).replaceAll(',', ''));
     if (numberText.includes('.')) {
@@ -119,8 +146,6 @@ function commaSeparation(numberText) {
         return formattedNumber;
     }
 }
-
-// check for any bugs
 
 keys.forEach(key => {
     key.addEventListener('click', ev => {
@@ -196,13 +221,10 @@ keys.forEach(key => {
                 isDecimalActive = true;
                 beginCalculation = true;
                 result = null;
-            } else if (firstNumber == bottomScreen.innerText) {
-                return;
-            }else if (firstNumber) {
+            } else if (firstNumber) {
                 topScreen.innerText = `${firstNumber}${currentOperation}`
                 bottomScreen.innerText = '0';
             } else {
-                console.log(firstNumber)
                 firstNumber = bottomScreen.innerText;
                 bottomScreen.innerText = '0';
                 topScreen.innerText = `${firstNumber.replaceAll(',', '')}${currentOperation}`
@@ -229,6 +251,9 @@ keys.forEach(key => {
 
         // if reset is pressed
         if (buttonPressed === 'reset') {
+            if (keysDisabled){
+                enableKeys();
+            }
             resetCalculation();
             bottomScreen.innerText += '0';
             beginCalculation = true;

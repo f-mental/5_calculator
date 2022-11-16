@@ -59,3 +59,7 @@ main {
 .wide {
     width: 105px;
 }
+
+.disabled {
+    cursor: not-allowed;
+}
