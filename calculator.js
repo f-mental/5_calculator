@@ -206,7 +206,7 @@ function operationPressed(buttonPressed) {
     isDecimalActive = false;
     // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
     // except when the values are equal;
-    if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber !== Number(bottomScreen.innerText.replace(',', '')))) {
+    if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber !== Number(bottomScreen.innerText.replace(',', ''))) && (!(topScreen.innerText.includes('=')))) {
         secondNumber = bottomScreen.innerText;
         result = performOperation(currentOperation, firstNumber, secondNumber);
         bottomScreen.innerText = commaSeparation(result);
@@ -228,7 +228,8 @@ function operationPressed(buttonPressed) {
 
 function equalSignPressed() {
     if (!firstNumber) {
-        topScreen.innerText = `${bottomScreen.innerText}=`
+        topScreen.innerText = `${Number(bottomScreen.innerText.replaceAll(',', ''))}=`
+        bottomScreen.innerText = commaSeparation(topScreen.innerText.replace('=',''));
         beginCalculation = true;
     } else {
         if (!result) {
