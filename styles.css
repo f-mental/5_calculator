@@ -1,42 +1,58 @@
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+    font-family: 'Share Tech Mono', monospace;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image: url(./background.webp);
+    background-size: cover;
+}
+
+h1 {
+    color: #a8a8a8;
+}
+
 main {
-    height: 525px;
-    width: 300px;
-    border: solid 1px #000000;
+    height: 535px;
+    width: 490px;
+    background-color: #a8a8a8;
+    border-radius: 5px;
 }
 
 /* CALCULATOR SCREEN */
 
 .screen {
-    border: solid 1px #000000;
+    padding: 5px;
     height: 110px;
-    width: 250px;
+    width: 430px;
     margin: 25px;
+    background-color: #6e9664;
+    border-radius: 5px;
 }
 
 .top {
-    border: solid 1px #000000;
     height: 25px;
-    width: 230px;
     margin: 10px;
     text-align: right;
 }
 
 .bottom {
     margin: 0 10px 0 10px;
-    border: solid 1px #000000;
     height: 50px;
     text-align: right;
     font-size: 2rem;
-    padding: 0 15px 0 15px; 
+    padding: 15px 15px 0 15px; 
 }
 
 /* CALCULATOR KEYS */
 
 .keyboard {
-    border: solid 1px #000000;
     height: 350px;
-    width: 250px;
-    margin: 25px;
+    width: 420px;
+    margin: 25px 25px 25px 35px;
+    padding: 5px;
 }
 
 .row {
@@ -44,22 +60,53 @@ main {
 }
 
 .keys{
-    border: solid 1px #000000;
+    border: none;
+    border-radius: 5px;
+    background-color: #ffffff;
     height: 50px;
-    width: 50px;
+    width: 90px;
     cursor: pointer;
+    font-family: inherit;
+    font-size: 1.3rem;
+    text-align: center;
 }
 
 .long {
     position: absolute;
     height: 115px;
-    margin: 0 15px 0 5px;
+    margin: 0 12px 0 10px;
 }
 
 .wide {
-    width: 105px;
+    width: 187px;
+}
+
+.red {
+    background-color: #ff0000;
+    color: #ffffff;
+}
+
+.violet {
+    background-color: #5e72ac;
+    color: #ffffff;
 }
 
 .disabled {
     cursor: not-allowed;
+}
+
+.lessopaque {
+    opacity: 30%;
+    cursor: not-allowed;
+}
+
+.warning {
+    margin-bottom: 10px;
+    font-size: 2rem;
+    color: #ff0000;
+}
+
+.error {
+    background-color: #ffffff;
+    color: #ff0000;
 }

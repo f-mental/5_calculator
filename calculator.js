@@ -1,6 +1,8 @@
 const keys = document.querySelectorAll('.keys');
+const bothScreen = document.querySelector('.screen');
 const topScreen = document.querySelector('.top');
 const bottomScreen = document.querySelector('.bottom');
+const warning = document.querySelector('.warning');
 const operations = '+-/*';
 const keyboardSection = document.querySelector('.keyboard');
 let firstNumber;
@@ -11,12 +13,13 @@ let beginCalculation = true;
 let isDecimalActive;
 let bottomTextLength;
 let keysDisabled;
+let isMaxDigit;
 
 function disableKeys() {
     keys.forEach(key => {
         if (key.value !== 'reset') {
             key.disabled =  true;
-            key.classList.add('disabled');
+            key.classList.add('lessopaque');
         }
     })
     keyboardSection.classList.add('disabled');
@@ -26,7 +29,7 @@ function disableKeys() {
 function enableKeys() {
     keys.forEach(key => {
         key.disabled = false;
-        key.classList.remove('disabled');
+        key.classList.remove('lessopaque');
     })
     keyboardSection.classList.remove('disabled');
     keysDisabled = false;
@@ -86,6 +89,7 @@ function performOperation (currentOperation, firstNumber, secondNumber) {
     if (/[a-z]/.test(answer)){
         disableKeys();
         topScreen.innerText = '';
+        bothScreen.classList.add('error');
         return 'Error/Overflow';
     } else {
         return answer;
@@ -98,6 +102,7 @@ function resetCalculation () {
     result = null;
     bottomScreen.innerText = '';
     topScreen.innerText = '';
+    bothScreen.classList.remove('error');
 }
 
 function commaSeparation(numberText) {
@@ -153,7 +158,8 @@ bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
                                                 .replaceAll('.','')
                                                 .length;
     if (bottomTextLength >= 16) {
-        alert("You reached max digit input!");
+        isMaxDigit = true;
+        warning.innerText = "Max digit input reached!";
     } else {
         // if non-zero digit is pressed
         if (/[1-9]/.test(buttonPressed)) {
@@ -170,7 +176,7 @@ bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
             } else if ((bottomScreen.innerText === '0')) {
                 bottomScreen.innerText = '';
                 bottomScreen.innerText += buttonPressed;
-            }else {
+            } else {
                 bottomScreen.innerText += buttonPressed;
                 bottomScreen.innerText = commaSeparation(bottomScreen.innerText)
             }
@@ -192,7 +198,7 @@ bottomTextLength = bottomScreen.innerText.replaceAll(',', '')
 }
 
 function decimalPressed(buttonPressed){
-    if (!isDecimalActive){
+    if (!isMaxDigit && !isDecimalActive){
         isDecimalActive = true;
         bottomScreen.innerText += buttonPressed;
         beginCalculation = false;
@@ -204,6 +210,10 @@ function operationPressed(buttonPressed) {
     result = null;
     currentOperation = buttonPressed;
     isDecimalActive = false;
+    if (isMaxDigit) {
+        warning.innerText = '';
+        isMaxDigit = false;
+    }
     // allow operation sign to act like equal sign, when first nubmer exists and something is typed in bottom screen
     // except when the values are equal;
     if (firstNumber && (bottomScreen.innerText !== '0') && (firstNumber !== Number(bottomScreen.innerText.replace(',', ''))) && (!(topScreen.innerText.includes('=')))) {
@@ -227,6 +237,12 @@ function operationPressed(buttonPressed) {
 
 
 function equalSignPressed() {
+    
+    if (isMaxDigit) {
+        warning.innerText = '';
+        isMaxDigit = false;
+    }
+
     if (!firstNumber) {
         topScreen.innerText = `${Number(bottomScreen.innerText.replaceAll(',', ''))}=`
         bottomScreen.innerText = commaSeparation(topScreen.innerText.replace('=',''));
@@ -324,11 +340,15 @@ document.addEventListener('keyup', ev => {
 
     // if operation symbol is pressed
     if (operations.includes(buttonPressed)) {
+        if (buttonPressed === '/') {
+            ev.preventDefault();
+        }
         operationPressed(buttonPressed);
     }
 
     // if equalsign is pressed
     if (buttonPressed === 'Enter') {
+        ev.preventDefault();
         equalSignPressed();
     }
 
