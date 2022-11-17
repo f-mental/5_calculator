@@ -270,6 +270,11 @@ function resetKeyPressed() {
 }
 
 function delKeyPressed(){
+    if (isMaxDigit) {
+        warning.innerText = '';
+        isMaxDigit = false;
+    }
+    
     if (!result) {
         bottomTextLength = bottomScreen.innerText.length;
         if (bottomTextLength > 1) {
